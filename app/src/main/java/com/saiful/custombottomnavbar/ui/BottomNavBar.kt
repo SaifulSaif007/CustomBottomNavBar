@@ -13,37 +13,41 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.saiful.custombottomnavbar.R
+import kotlinx.coroutines.delay
 
 @Composable
 fun BottomNavBar(
     bottomNavItem: List<BottomNavItem>,
-    initialIndex: MutableIntState,
+    initialIndex: MutableIntState = remember { mutableIntStateOf(0) },
 ) {
 
-    var width by remember { mutableFloatStateOf(0f) }
     var itemWidth by remember { mutableFloatStateOf(0f) }
+    val itemsWidth by remember { mutableStateOf(FloatArray(bottomNavItem.size)) }
 
     val offsetAnim by animateFloatAsState(
         targetValue = when (initialIndex.value) {
             0 -> 0f
-            else -> initialIndex.value * itemWidth
+            else -> itemsWidth[initialIndex.value - 1] * initialIndex.value
         },
         label = ""
     )
 
     var offsetAnimInDp by remember { mutableStateOf(0.dp) }
-    var itemInDp by remember { mutableStateOf(30.dp) }
+    var itemInDp by remember { mutableStateOf(0.dp) }
 
     val density = LocalDensity.current
 
     LaunchedEffect(key1 = itemWidth, block = {
-        itemInDp = with(density) { itemWidth.toDp() }
+        itemInDp = with(density) {
+            itemsWidth[initialIndex.value].toDp()
+        }
     })
 
     LaunchedEffect(key1 = offsetAnim, block = {
@@ -62,35 +66,34 @@ fun BottomNavBar(
         ) {
             Box(
                 modifier = Modifier
-                    .fillMaxWidth(.95f)
+                    .fillMaxWidth(0.95f)
                     .fillMaxHeight(),
                 contentAlignment = Alignment.CenterStart
             ) {
 
-                BottomAppBar(
+                Row(
                     modifier = Modifier
-                        .fillMaxWidth()
+                        .wrapContentWidth()
                         .fillMaxHeight()
-                        .onGloballyPositioned {
-                            width = it.size.width.toFloat()
-                            itemWidth = width / bottomNavItem.size
-                        },
-                    containerColor = Color.White,
-                    tonalElevation = 0.dp,
-                    contentPadding = PaddingValues(0.dp)
+                        .background(Color.Yellow.copy(alpha = .2f)),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     bottomNavItem.forEachIndexed { index, item ->
                         Row(
                             modifier = Modifier
-                                .weight(1f)
-                                .fillMaxSize()
-                                .padding(5.dp)
                                 .clickable(
                                     indication = null,
                                     interactionSource = MutableInteractionSource()
                                 ) {
                                     initialIndex.value = index
-                                },
+                                }
+                                .onSizeChanged {
+                                    println("$index -> ${it.width}")
+                                    itemWidth = it.width.toFloat()
+                                    itemsWidth[index] = itemWidth
+                                }
+                                .padding(5.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.Center
                         ) {
@@ -125,7 +128,7 @@ fun BottomNavBar(
                         .width(itemInDp)
                         .height(50.dp)
                         .offset(offsetAnimInDp)
-                        .clip(RoundedCornerShape(50))
+                        .clip(RoundedCornerShape(24f))
                         .background(Color.Blue.copy(alpha = 0.2f))
                 )
             }
@@ -146,12 +149,12 @@ private fun BottomNavBarPreview() {
                 icon = R.drawable.ic_launcher_foreground
             ),
             BottomNavItem(
-                name = "Search",
+                name = "Search Value sldl",
                 route = "search",
                 icon = R.drawable.ic_launcher_foreground
             ),
             BottomNavItem(
-                name = "Search",
+                name = "T",
                 route = "search",
                 icon = R.drawable.ic_launcher_foreground
             ),
