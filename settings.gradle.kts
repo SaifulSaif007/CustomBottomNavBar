@@ -21,3 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "CustomBottomNavBar"
 include(":app")
+include(":animated-bottom-bar")

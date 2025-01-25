@@ -10,8 +10,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.saiful.custombottomnavbar.ui.BottomNavBar
-import com.saiful.custombottomnavbar.ui.BottomNavItem
+import com.saiful.animated_bottom_bar.ui.AnimatedBottomBar
+
 import com.saiful.custombottomnavbar.ui.theme.CustomBottomNavBarTheme
 
 class MainActivity : ComponentActivity() {
@@ -22,23 +22,28 @@ class MainActivity : ComponentActivity() {
             CustomBottomNavBarTheme {
                 Scaffold(modifier = Modifier.fillMaxSize(),
                     bottomBar = {
-                        BottomNavBar(
+                        AnimatedBottomBar(
                             initialIndex = remember { mutableIntStateOf(0) },
                             bottomNavItem = listOf(
-                                BottomNavItem(
+                                com.saiful.animated_bottom_bar.ui.model.BottomNavItem(
                                     name = "Home",
                                     route = "home",
-                                    icon = R.drawable.ic_launcher_foreground
+                                    icon = R.drawable.ic_home
                                 ),
-                                BottomNavItem(
-                                    name = "Searching Value",
+                                com.saiful.animated_bottom_bar.ui.model.BottomNavItem(
+                                    name = "Search",
                                     route = "search",
-                                    icon = R.drawable.ic_launcher_foreground
+                                    icon = R.drawable.ic_search
                                 ),
-                                BottomNavItem(
-                                    name = "Ty",
-                                    route = "search",
-                                    icon = R.drawable.ic_launcher_foreground
+                                com.saiful.animated_bottom_bar.ui.model.BottomNavItem(
+                                    name = "Profile",
+                                    route = "profile",
+                                    icon = R.drawable.ic_profile
+                                ),
+                                com.saiful.animated_bottom_bar.ui.model.BottomNavItem(
+                                    name = "Settings",
+                                    route = "setting",
+                                    icon = R.drawable.ic_setting
                                 ),
                             )
                         )
@@ -55,28 +60,11 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    BottomNavBar(
-        bottomNavItem = listOf(
-            BottomNavItem(
-                name = "Home",
-                route = "home",
-                icon = R.drawable.ic_launcher_foreground
-            ),
-            BottomNavItem(
-                name = "Search",
-                route = "search",
-                icon = R.drawable.ic_launcher_foreground
-            ),
-        )
-    )
-}
 
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
     CustomBottomNavBarTheme {
-        Greeting("Android")
+
     }
 }

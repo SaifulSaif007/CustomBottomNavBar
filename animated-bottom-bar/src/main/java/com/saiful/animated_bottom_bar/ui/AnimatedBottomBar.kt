@@ -1,8 +1,9 @@
-package com.saiful.custombottomnavbar.ui
+package com.saiful.animated_bottom_bar.ui
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -12,18 +13,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.saiful.custombottomnavbar.R
-import kotlinx.coroutines.delay
+import com.saiful.animated_bottom_bar.R
+import com.saiful.animated_bottom_bar.ui.model.BottomNavItem
 
 @Composable
-fun BottomNavBar(
+fun AnimatedBottomBar(
     bottomNavItem: List<BottomNavItem>,
     initialIndex: MutableIntState = remember { mutableIntStateOf(0) },
 ) {
@@ -34,7 +34,7 @@ fun BottomNavBar(
     val offsetAnim by animateFloatAsState(
         targetValue = when (initialIndex.value) {
             0 -> 0f
-            else -> itemsWidth[initialIndex.value - 1] * initialIndex.value
+            else -> itemsWidth[0] * initialIndex.value
         },
         label = ""
     )
@@ -51,6 +51,7 @@ fun BottomNavBar(
     })
 
     LaunchedEffect(key1 = offsetAnim, block = {
+        println(offsetAnimInDp)
         offsetAnimInDp = with(density) { offsetAnim.toDp() }
     })
 
@@ -89,7 +90,6 @@ fun BottomNavBar(
                                     initialIndex.value = index
                                 }
                                 .onSizeChanged {
-                                    println("$index -> ${it.width}")
                                     itemWidth = it.width.toFloat()
                                     itemsWidth[index] = itemWidth
                                 }
@@ -140,23 +140,23 @@ fun BottomNavBar(
 @Preview
 @Composable
 private fun BottomNavBarPreview() {
-    BottomNavBar(
+    AnimatedBottomBar(
         initialIndex = remember { mutableIntStateOf(0) },
         bottomNavItem = listOf(
             BottomNavItem(
                 name = "Home",
                 route = "home",
-                icon = R.drawable.ic_launcher_foreground
+                icon = R.drawable.ic_home
             ),
             BottomNavItem(
                 name = "Search Value sldl",
                 route = "search",
-                icon = R.drawable.ic_launcher_foreground
+                icon = R.drawable.ic_home
             ),
             BottomNavItem(
                 name = "T",
                 route = "search",
-                icon = R.drawable.ic_launcher_foreground
+                icon = R.drawable.ic_home
             ),
         )
     )

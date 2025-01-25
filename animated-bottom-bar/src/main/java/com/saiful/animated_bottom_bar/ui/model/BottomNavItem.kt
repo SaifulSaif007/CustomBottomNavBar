@@ -1,4 +1,4 @@
-package com.saiful.custombottomnavbar.ui
+package com.saiful.animated_bottom_bar.ui.model
 
 data class BottomNavItem(
     val name: String,
