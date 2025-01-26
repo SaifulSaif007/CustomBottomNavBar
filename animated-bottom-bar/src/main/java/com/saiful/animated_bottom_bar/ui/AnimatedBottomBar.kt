@@ -20,12 +20,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.saiful.animated_bottom_bar.R
+import com.saiful.animated_bottom_bar.ui.model.BottomBarProperties
 import com.saiful.animated_bottom_bar.ui.model.BottomNavItem
 
 @Composable
 fun AnimatedBottomBar(
     bottomNavItem: List<BottomNavItem>,
     initialIndex: MutableIntState = remember { mutableIntStateOf(0) },
+    bottomBarProperties: BottomBarProperties = BottomBarProperties()
 ) {
 
     var itemWidth by remember { mutableFloatStateOf(0f) }
@@ -34,7 +36,7 @@ fun AnimatedBottomBar(
     val offsetAnim by animateFloatAsState(
         targetValue = when (initialIndex.value) {
             0 -> 0f
-            else -> itemsWidth[0] * initialIndex.value
+            else -> itemsWidth[0] * initialIndex.value //shortest size value needed
         },
         label = ""
     )
@@ -60,7 +62,7 @@ fun AnimatedBottomBar(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color.White)
+                .background(bottomBarProperties.background)
                 .height(70.dp),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
@@ -75,8 +77,7 @@ fun AnimatedBottomBar(
                 Row(
                     modifier = Modifier
                         .wrapContentWidth()
-                        .fillMaxHeight()
-                        .background(Color.Yellow.copy(alpha = .2f)),
+                        .fillMaxHeight(),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
@@ -93,29 +94,28 @@ fun AnimatedBottomBar(
                                     itemWidth = it.width.toFloat()
                                     itemsWidth[index] = itemWidth
                                 }
-                                .padding(5.dp),
+                                .padding(bottomBarProperties.itemPadding),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.Center
                         ) {
 
                             val tintColor =
-                                if (initialIndex.value == index) Color.Cyan else Color.DarkGray
+                                if (initialIndex.value == index) bottomBarProperties.selectedIconColor else bottomBarProperties.unselectedIconColor
 
                             Icon(
                                 painter = painterResource(id = item.icon),
                                 contentDescription = "Home",
-                                modifier = Modifier.size(24.dp),
+                                modifier = Modifier.size(bottomBarProperties.iconSize.dp),
                                 tint = tintColor
                             )
 
                             AnimatedVisibility(visible = index == initialIndex.value) {
                                 Text(
                                     text = item.name,
-                                    color = tintColor,
                                     maxLines = 1,
-                                    softWrap = true,
                                     overflow = TextOverflow.Ellipsis,
-                                    modifier = Modifier.padding(start = 5.dp),
+                                    style = bottomBarProperties.labelTextStyle,
+                                    modifier = Modifier.padding(start = 4.dp),
                                 )
                             }
 
@@ -158,6 +158,11 @@ private fun BottomNavBarPreview() {
                 route = "search",
                 icon = R.drawable.ic_home
             ),
+        ),
+        bottomBarProperties = BottomBarProperties(
+            background = Color.White,
+            selectedIconColor = Color.Blue.copy(alpha = 0.5f),
+            unselectedIconColor = Color.LightGray
         )
     )
 }
