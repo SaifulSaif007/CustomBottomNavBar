@@ -36,7 +36,7 @@ fun AnimatedBottomBar(
     val offsetAnim by animateFloatAsState(
         targetValue = when (initialIndex.value) {
             0 -> 0f
-            else -> itemsWidth[0] * initialIndex.value //shortest size value needed
+            else -> itemsWidth.min() * initialIndex.value
         },
         label = ""
     )
@@ -64,15 +64,24 @@ fun AnimatedBottomBar(
                 .fillMaxWidth()
                 .background(bottomBarProperties.background)
                 .height(70.dp),
-            horizontalArrangement = Arrangement.Center,
+            horizontalArrangement = bottomBarProperties.itemArrangement,
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Box(
                 modifier = Modifier
-                    .fillMaxWidth(0.95f)
-                    .fillMaxHeight(),
+                    .fillMaxHeight()
+                    .padding(horizontal = 8.dp),
                 contentAlignment = Alignment.CenterStart
             ) {
+
+                Box(
+                    modifier = Modifier
+                        .width(itemInDp)
+                        .height(50.dp)
+                        .offset(offsetAnimInDp)
+                        .clip(bottomBarProperties.indicatorShape)
+                        .background(bottomBarProperties.indicatorColor)
+                )
 
                 Row(
                     modifier = Modifier
@@ -123,14 +132,6 @@ fun AnimatedBottomBar(
                     }
                 }
 
-                Box(
-                    modifier = Modifier
-                        .width(itemInDp)
-                        .height(50.dp)
-                        .offset(offsetAnimInDp)
-                        .clip(RoundedCornerShape(24f))
-                        .background(Color.Blue.copy(alpha = 0.2f))
-                )
             }
 
         }
@@ -159,10 +160,5 @@ private fun BottomNavBarPreview() {
                 icon = R.drawable.ic_home
             ),
         ),
-        bottomBarProperties = BottomBarProperties(
-            background = Color.White,
-            selectedIconColor = Color.Blue.copy(alpha = 0.5f),
-            unselectedIconColor = Color.LightGray
-        )
     )
 }
