@@ -6,13 +6,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
@@ -26,17 +24,18 @@ import com.saiful.animated_bottom_bar.ui.model.BottomNavItem
 @Composable
 fun AnimatedBottomBar(
     bottomNavItem: List<BottomNavItem>,
-    initialIndex: MutableIntState = remember { mutableIntStateOf(0) },
-    bottomBarProperties: BottomBarProperties = BottomBarProperties()
+    currentIndex: MutableIntState = remember { mutableIntStateOf(0) },
+    bottomBarProperties: BottomBarProperties = BottomBarProperties(),
+    onSelectedItem: (BottomNavItem) -> Unit = {},
 ) {
 
     var itemWidth by remember { mutableFloatStateOf(0f) }
     val itemsWidth by remember { mutableStateOf(FloatArray(bottomNavItem.size)) }
 
     val offsetAnim by animateFloatAsState(
-        targetValue = when (initialIndex.value) {
+        targetValue = when (currentIndex.value) {
             0 -> 0f
-            else -> itemsWidth.min() * initialIndex.value
+            else -> itemsWidth.min() * currentIndex.value
         },
         label = ""
     )
@@ -48,7 +47,7 @@ fun AnimatedBottomBar(
 
     LaunchedEffect(key1 = itemWidth, block = {
         itemInDp = with(density) {
-            itemsWidth[initialIndex.value].toDp()
+            itemsWidth[currentIndex.value].toDp()
         }
     })
 
@@ -97,7 +96,7 @@ fun AnimatedBottomBar(
                                     indication = null,
                                     interactionSource = MutableInteractionSource()
                                 ) {
-                                    initialIndex.value = index
+                                    onSelectedItem(item)
                                 }
                                 .onSizeChanged {
                                     itemWidth = it.width.toFloat()
@@ -109,7 +108,7 @@ fun AnimatedBottomBar(
                         ) {
 
                             val tintColor =
-                                if (initialIndex.value == index) bottomBarProperties.selectedIconColor else bottomBarProperties.unselectedIconColor
+                                if (currentIndex.value == index) bottomBarProperties.selectedIconColor else bottomBarProperties.unselectedIconColor
 
                             Icon(
                                 painter = painterResource(id = item.icon),
@@ -118,7 +117,7 @@ fun AnimatedBottomBar(
                                 tint = tintColor
                             )
 
-                            AnimatedVisibility(visible = index == initialIndex.value) {
+                            AnimatedVisibility(visible = index == currentIndex.value) {
                                 Text(
                                     text = item.name,
                                     maxLines = 1,
@@ -142,7 +141,7 @@ fun AnimatedBottomBar(
 @Composable
 private fun BottomNavBarPreview() {
     AnimatedBottomBar(
-        initialIndex = remember { mutableIntStateOf(0) },
+        currentIndex = remember { mutableIntStateOf(0) },
         bottomNavItem = listOf(
             BottomNavItem(
                 name = "Home",
