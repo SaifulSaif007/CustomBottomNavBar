@@ -1,6 +1,7 @@
 package com.saiful.custombottomnavbar
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -12,6 +13,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.*
 
 import com.saiful.animated_bottom_bar.ui.AnimatedBottomBar
+import com.saiful.animated_bottom_bar.ui.model.BottomBarProperties
 import com.saiful.custombottomnavbar.ui.screen.Screen
 
 import com.saiful.custombottomnavbar.ui.theme.CustomBottomNavBarTheme
@@ -25,23 +27,14 @@ class MainActivity : ComponentActivity() {
 
                 val navController = rememberNavController()
 
+                navController.addOnDestinationChangedListener { controller, destination, arguments ->
+                    Log.d("TAG", "current destination: ${destination.route}")
+                }
 
                 Scaffold(modifier = Modifier.fillMaxSize(),
                     bottomBar = {
-                        val currentIndex = remember { mutableIntStateOf(0) }
-                        val navBackStackEntry by navController.currentBackStackEntryAsState()
-                        val currentDestination = navBackStackEntry?.destination
-
-                        currentIndex.value = when (currentDestination?.route) {
-                            "home" -> 0
-                            "search" -> 1
-                            "profile" -> 2
-                            "setting" -> 3
-                            else -> 0
-                        }
-
                         AnimatedBottomBar(
-                            currentIndex = currentIndex,
+                            navController = navController,
                             bottomNavItem = listOf(
                                 com.saiful.animated_bottom_bar.ui.model.BottomNavItem(
                                     name = "Home",
@@ -64,14 +57,11 @@ class MainActivity : ComponentActivity() {
                                     icon = R.drawable.ic_setting
                                 ),
                             ),
+                            bottomBarProperties = BottomBarProperties(
+                                itemArrangement = Arrangement.Start
+                            ),
                             onSelectedItem = {
-                                navController.navigate(it.route) {
-                                    popUpTo(navController.graph.startDestinationId) {
-                                        saveState = true
-                                    }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
+                                Log.d("TAG", "Selected Item: ${it.route}")
                             }
                         )
                     }
@@ -106,7 +96,5 @@ class MainActivity : ComponentActivity() {
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
-    CustomBottomNavBarTheme {
-
-    }
+    CustomBottomNavBarTheme {}
 }
