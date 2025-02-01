@@ -29,7 +29,7 @@ fun AnimatedBottomBar(
     navController: NavHostController,
     bottomNavItem: List<BottomNavItem>,
     bottomBarProperties: BottomBarProperties = BottomBarProperties(),
-    onSelectedItem: (BottomNavItem) -> Unit = {},
+    onSelectItem: (BottomNavItem) -> Unit = {},
 ) {
 
     val currentIndex: MutableIntState = remember { mutableIntStateOf(0) }
@@ -101,14 +101,7 @@ fun AnimatedBottomBar(
                                     indication = null,
                                     interactionSource = MutableInteractionSource()
                                 ) {
-                                    onSelectedItem(item)
-                                    navController.navigate(item.route) {
-                                        popUpTo(navController.graph.startDestinationId) {
-                                            saveState = true
-                                        }
-                                        launchSingleTop = true
-                                        restoreState = true
-                                    }
+                                    onSelectItem(item)
                                 }
                                 .onSizeChanged {
                                     itemWidth = it.width.toFloat()

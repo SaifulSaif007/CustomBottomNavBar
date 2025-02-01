@@ -14,6 +14,7 @@ import androidx.navigation.compose.*
 
 import com.saiful.animated_bottom_bar.ui.AnimatedBottomBar
 import com.saiful.animated_bottom_bar.ui.model.BottomBarProperties
+import com.saiful.animated_bottom_bar.ui.model.BottomNavItem
 import com.saiful.custombottomnavbar.ui.screen.Screen
 
 import com.saiful.custombottomnavbar.ui.theme.CustomBottomNavBarTheme
@@ -27,7 +28,7 @@ class MainActivity : ComponentActivity() {
 
                 val navController = rememberNavController()
 
-                navController.addOnDestinationChangedListener { controller, destination, arguments ->
+                navController.addOnDestinationChangedListener { _, destination, _ ->
                     Log.d("TAG", "current destination: ${destination.route}")
                 }
 
@@ -36,22 +37,22 @@ class MainActivity : ComponentActivity() {
                         AnimatedBottomBar(
                             navController = navController,
                             bottomNavItem = listOf(
-                                com.saiful.animated_bottom_bar.ui.model.BottomNavItem(
+                                BottomNavItem(
                                     name = "Home",
                                     route = "home",
                                     icon = R.drawable.ic_home
                                 ),
-                                com.saiful.animated_bottom_bar.ui.model.BottomNavItem(
+                                BottomNavItem(
                                     name = "Search",
                                     route = "search",
                                     icon = R.drawable.ic_search
                                 ),
-                                com.saiful.animated_bottom_bar.ui.model.BottomNavItem(
+                                BottomNavItem(
                                     name = "Profile",
                                     route = "profile",
                                     icon = R.drawable.ic_profile
                                 ),
-                                com.saiful.animated_bottom_bar.ui.model.BottomNavItem(
+                                BottomNavItem(
                                     name = "Settings",
                                     route = "setting",
                                     icon = R.drawable.ic_setting
@@ -60,8 +61,15 @@ class MainActivity : ComponentActivity() {
                             bottomBarProperties = BottomBarProperties(
                                 itemArrangement = Arrangement.Start
                             ),
-                            onSelectedItem = {
+                            onSelectItem = {
                                 Log.d("TAG", "Selected Item: ${it.route}")
+                                navController.navigate(it.route) {
+                                    popUpTo(navController.graph.startDestinationId) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
                             }
                         )
                     }
