@@ -11,6 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
@@ -23,6 +24,7 @@ import androidx.navigation.compose.rememberNavController
 import com.saiful.animated_bottom_bar.R
 import com.saiful.animated_bottom_bar.ui.model.BottomBarProperties
 import com.saiful.animated_bottom_bar.ui.model.BottomNavItem
+import kotlinx.coroutines.delay
 
 @Composable
 fun AnimatedBottomBar(
@@ -36,10 +38,27 @@ fun AnimatedBottomBar(
     var itemWidth by remember { mutableFloatStateOf(0f) }
     val itemsWidth by remember { mutableStateOf(FloatArray(bottomNavItem.size)) }
 
+    // New: Track total width for spread mode
+    var totalWidth by remember { mutableFloatStateOf(0f) }
+
     val offsetAnim by animateFloatAsState(
-        targetValue = when (currentIndex.intValue) {
-            0 -> 0f
-            else -> itemsWidth.min() * currentIndex.intValue
+        targetValue = if (bottomBarProperties.spreadItems) {
+            // Spread mode: offset = index * (totalWidth/itemCount)
+            // offset = (totalWidth / bottomNavItem.size) * currentIndex.intValue
+            // plus  [(totalWidth / bottomNavItem.size) - itemWidth] / 2
+            val singleItemWidth = totalWidth / bottomNavItem.size
+            if (bottomNavItem.isNotEmpty()) {
+                when (currentIndex.intValue) {
+                    0 -> 0f
+                    else -> singleItemWidth * currentIndex.intValue + (singleItemWidth - itemWidth) / 2
+                }
+            } else 0f
+        } else {
+            // Old logic
+            when (currentIndex.intValue) {
+                0 -> 0f
+                else -> itemsWidth.min() * currentIndex.intValue
+            }
         },
         label = ""
     )
@@ -67,14 +86,16 @@ fun AnimatedBottomBar(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(bottomBarProperties.background)
-                .height(70.dp),
+                .height(70.dp)
+                .onSizeChanged {
+                    if (bottomBarProperties.spreadItems) totalWidth = it.width.toFloat()
+                },
             horizontalArrangement = bottomBarProperties.itemArrangement,
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Box(
                 modifier = Modifier
-                    .fillMaxHeight()
-                    .padding(horizontal = 8.dp),
+                    .fillMaxHeight(),
                 contentAlignment = Alignment.CenterStart
             ) {
 
@@ -89,10 +110,12 @@ fun AnimatedBottomBar(
 
                 Row(
                     modifier = Modifier
-                        .wrapContentWidth()
+                        .then(
+                            if (bottomBarProperties.spreadItems) Modifier.fillMaxWidth() else Modifier.wrapContentWidth()
+                        )
                         .fillMaxHeight(),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceEvenly
+                    horizontalArrangement = if (bottomBarProperties.spreadItems) Arrangement.SpaceBetween else Arrangement.Start
                 ) {
                     bottomNavItem.forEachIndexed { index, item ->
                         Row(
@@ -103,10 +126,13 @@ fun AnimatedBottomBar(
                                 ) {
                                     onSelectItem(item)
                                 }
-                                .onSizeChanged {
-                                    itemWidth = it.width.toFloat()
-                                    itemsWidth[index] = itemWidth
-                                }
+                                .then(
+                                    Modifier.onSizeChanged {
+                                        println("size $it index $index")
+                                        itemWidth = it.width.toFloat()
+                                        itemsWidth[index] = itemWidth
+                                    }
+                                )
                                 .padding(bottomBarProperties.itemPadding),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.Center

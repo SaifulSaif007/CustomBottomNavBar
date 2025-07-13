@@ -38,24 +38,24 @@ class MainActivity : ComponentActivity() {
                             navController = navController,
                             bottomNavItem = listOf(
                                 BottomNavItem(
-                                    name = "Home",
+                                    name = "Ho",
                                     route = "home",
                                     icon = R.drawable.ic_home
                                 ),
                                 BottomNavItem(
-                                    name = "Search",
+                                    name = "Settings aa",
+                                    route = "setting",
+                                    icon = R.drawable.ic_setting
+                                ),
+                                BottomNavItem(
+                                    name = "Sea",
                                     route = "search",
                                     icon = R.drawable.ic_search
                                 ),
                                 BottomNavItem(
-                                    name = "Profile",
+                                    name = "ProfileKKL",
                                     route = "profile",
                                     icon = R.drawable.ic_profile
-                                ),
-                                BottomNavItem(
-                                    name = "Settings",
-                                    route = "setting",
-                                    icon = R.drawable.ic_setting
                                 ),
                             ),
                             bottomBarProperties = BottomBarProperties(
