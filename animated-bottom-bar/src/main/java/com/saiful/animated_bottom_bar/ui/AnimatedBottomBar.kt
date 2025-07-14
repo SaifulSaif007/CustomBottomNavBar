@@ -5,14 +5,36 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableIntState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -24,7 +46,6 @@ import androidx.navigation.compose.rememberNavController
 import com.saiful.animated_bottom_bar.R
 import com.saiful.animated_bottom_bar.ui.model.BottomBarProperties
 import com.saiful.animated_bottom_bar.ui.model.BottomNavItem
-import kotlinx.coroutines.delay
 
 @Composable
 fun AnimatedBottomBar(
@@ -37,29 +58,19 @@ fun AnimatedBottomBar(
     val currentIndex: MutableIntState = remember { mutableIntStateOf(0) }
     var itemWidth by remember { mutableFloatStateOf(0f) }
     val itemsWidth by remember { mutableStateOf(FloatArray(bottomNavItem.size)) }
+    val offsets = remember { mutableStateListOf<Offset>() }
 
-    // New: Track total width for spread mode
-    var totalWidth by remember { mutableFloatStateOf(0f) }
+
+    // Initialize with zero offsets if needed
+    LaunchedEffect(bottomNavItem.size) {
+        if (offsets.size < bottomNavItem.size) {
+            offsets.addAll(List(bottomNavItem.size - offsets.size) { Offset.Zero })
+        }
+    }
+
 
     val offsetAnim by animateFloatAsState(
-        targetValue = if (bottomBarProperties.spreadItems) {
-            // Spread mode: offset = index * (totalWidth/itemCount)
-            // offset = (totalWidth / bottomNavItem.size) * currentIndex.intValue
-            // plus  [(totalWidth / bottomNavItem.size) - itemWidth] / 2
-            val singleItemWidth = totalWidth / bottomNavItem.size
-            if (bottomNavItem.isNotEmpty()) {
-                when (currentIndex.intValue) {
-                    0 -> 0f
-                    else -> singleItemWidth * currentIndex.intValue + (singleItemWidth - itemWidth) / 2
-                }
-            } else 0f
-        } else {
-            // Old logic
-            when (currentIndex.intValue) {
-                0 -> 0f
-                else -> itemsWidth.min() * currentIndex.intValue
-            }
-        },
+        targetValue = offsets.getOrNull(currentIndex.intValue)?.x ?: 0f,
         label = ""
     )
 
@@ -87,10 +98,7 @@ fun AnimatedBottomBar(
                 .fillMaxWidth()
                 .background(bottomBarProperties.background)
                 .height(70.dp)
-                .onSizeChanged {
-                    if (bottomBarProperties.spreadItems) totalWidth = it.width.toFloat()
-                },
-            horizontalArrangement = bottomBarProperties.itemArrangement,
+                .padding(horizontal = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Box(
@@ -110,12 +118,10 @@ fun AnimatedBottomBar(
 
                 Row(
                     modifier = Modifier
-                        .then(
-                            if (bottomBarProperties.spreadItems) Modifier.fillMaxWidth() else Modifier.wrapContentWidth()
-                        )
+                        .then(Modifier.fillMaxWidth())
                         .fillMaxHeight(),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = if (bottomBarProperties.spreadItems) Arrangement.SpaceBetween else Arrangement.Start
+                    horizontalArrangement = bottomBarProperties.itemArrangement,
                 ) {
                     bottomNavItem.forEachIndexed { index, item ->
                         Row(
@@ -127,11 +133,19 @@ fun AnimatedBottomBar(
                                     onSelectItem(item)
                                 }
                                 .then(
-                                    Modifier.onSizeChanged {
-                                        println("size $it index $index")
-                                        itemWidth = it.width.toFloat()
-                                        itemsWidth[index] = itemWidth
-                                    }
+                                    Modifier
+                                        .onSizeChanged {
+                                            itemWidth = it.width.toFloat()
+                                            itemsWidth[index] = itemWidth
+                                        }
+                                        .onGloballyPositioned { layoutCoordinates ->
+                                            val position = layoutCoordinates.positionInParent()
+                                            if (index < offsets.size) {
+                                                offsets[index] = position
+                                            } else {
+                                                offsets.add(position)
+                                            }
+                                        }
                                 )
                                 .padding(bottomBarProperties.itemPadding),
                             verticalAlignment = Alignment.CenterVertically,

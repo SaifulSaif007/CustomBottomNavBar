@@ -24,5 +24,4 @@ data class BottomBarProperties(
     val itemArrangement: Arrangement.Horizontal = Arrangement.Start,
     val indicatorColor: Color = Color.Blue.copy(alpha = 0.5f),
     val indicatorShape: Shape = RoundedCornerShape(12.dp),
-    val spreadItems: Boolean = true // If true, items are spread evenly across the full width
 )

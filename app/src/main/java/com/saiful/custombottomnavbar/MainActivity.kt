@@ -38,28 +38,28 @@ class MainActivity : ComponentActivity() {
                             navController = navController,
                             bottomNavItem = listOf(
                                 BottomNavItem(
-                                    name = "Ho",
+                                    name = "Home",
                                     route = "home",
                                     icon = R.drawable.ic_home
                                 ),
                                 BottomNavItem(
-                                    name = "Settings aa",
+                                    name = "Settings",
                                     route = "setting",
                                     icon = R.drawable.ic_setting
                                 ),
                                 BottomNavItem(
-                                    name = "Sea",
+                                    name = "Search",
                                     route = "search",
                                     icon = R.drawable.ic_search
                                 ),
                                 BottomNavItem(
-                                    name = "ProfileKKL",
+                                    name = "Profile",
                                     route = "profile",
                                     icon = R.drawable.ic_profile
                                 ),
                             ),
                             bottomBarProperties = BottomBarProperties(
-                                itemArrangement = Arrangement.Start
+                                itemArrangement = Arrangement.SpaceAround
                             ),
                             onSelectItem = {
                                 Log.d("TAG", "Selected Item: ${it.route}")
