@@ -5,22 +5,41 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableIntState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
-import com.saiful.animated_bottom_bar.R
 import com.saiful.animated_bottom_bar.ui.model.BottomBarProperties
 import com.saiful.animated_bottom_bar.ui.model.BottomNavItem
 
@@ -33,28 +52,34 @@ fun AnimatedBottomBar(
 ) {
 
     val currentIndex: MutableIntState = remember { mutableIntStateOf(0) }
-    var itemWidth by remember { mutableFloatStateOf(0f) }
     val itemsWidth by remember { mutableStateOf(FloatArray(bottomNavItem.size)) }
+    val itemsOffsets = remember { mutableStateListOf<Offset>() }
 
-    val offsetAnim by animateFloatAsState(
-        targetValue = when (currentIndex.intValue) {
-            0 -> 0f
-            else -> itemsWidth.min() * currentIndex.intValue
-        },
+    var indicatorOffsetX by remember { mutableStateOf(0.dp) }
+    var indicatorBoxWidth by remember { mutableStateOf(0.dp) }
+
+
+    // Initialize with zero offsets if needed
+    LaunchedEffect(bottomNavItem.size) {
+        if (itemsOffsets.size < bottomNavItem.size) {
+            itemsOffsets.addAll(List(bottomNavItem.size - itemsOffsets.size) { Offset.Zero })
+        }
+    }
+
+    val indicatorOffsetAnim by animateFloatAsState(
+        targetValue = itemsOffsets.getOrNull(currentIndex.intValue)?.x ?: 0f,
         label = ""
     )
 
-    var offsetAnimInDp by remember { mutableStateOf(0.dp) }
-    var itemInDp by remember { mutableStateOf(0.dp) }
 
     val density = LocalDensity.current
 
-    LaunchedEffect(key1 = itemWidth) {
-        itemInDp = with(density) { itemsWidth[currentIndex.intValue].toDp() }
+    LaunchedEffect(key1 = itemsWidth[currentIndex.intValue]) {
+        indicatorBoxWidth = with(density) { itemsWidth[currentIndex.intValue].toDp() }
     }
 
-    LaunchedEffect(key1 = offsetAnim) {
-        offsetAnimInDp = with(density) { offsetAnim.toDp() }
+    LaunchedEffect(key1 = indicatorOffsetAnim) {
+        indicatorOffsetX = with(density) { indicatorOffsetAnim.toDp() }
     }
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -67,32 +92,31 @@ fun AnimatedBottomBar(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(bottomBarProperties.background)
-                .height(70.dp),
-            horizontalArrangement = bottomBarProperties.itemArrangement,
+                .height(70.dp)
+                .padding(horizontal = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Box(
                 modifier = Modifier
-                    .fillMaxHeight()
-                    .padding(horizontal = 8.dp),
+                    .fillMaxHeight(),
                 contentAlignment = Alignment.CenterStart
             ) {
 
                 Box(
                     modifier = Modifier
-                        .width(itemInDp)
+                        .width(indicatorBoxWidth)
                         .height(50.dp)
-                        .offset(offsetAnimInDp)
+                        .offset(x = indicatorOffsetX)
                         .clip(bottomBarProperties.indicatorShape)
                         .background(bottomBarProperties.indicatorColor)
                 )
 
                 Row(
                     modifier = Modifier
-                        .wrapContentWidth()
+                        .then(Modifier.fillMaxWidth())
                         .fillMaxHeight(),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceEvenly
+                    horizontalArrangement = bottomBarProperties.itemArrangement,
                 ) {
                     bottomNavItem.forEachIndexed { index, item ->
                         Row(
@@ -103,11 +127,17 @@ fun AnimatedBottomBar(
                                 ) {
                                     onSelectItem(item)
                                 }
-                                .onSizeChanged {
-                                    itemWidth = it.width.toFloat()
-                                    itemsWidth[index] = itemWidth
-                                }
-                                .padding(bottomBarProperties.itemPadding),
+                                .then(Modifier.onSizeChanged {
+                                        itemsWidth[index] = it.width.toFloat()
+                                    }.onGloballyPositioned { layoutCoordinates ->
+                                        val position = layoutCoordinates.positionInParent()
+                                        if (index < itemsOffsets.size) {
+                                            itemsOffsets[index] = position
+                                        } else {
+                                            itemsOffsets.add(position)
+                                        }
+                                    })
+                                .padding(horizontal = bottomBarProperties.itemPadding),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.Center
                         ) {
@@ -118,7 +148,7 @@ fun AnimatedBottomBar(
                             Icon(
                                 painter = painterResource(id = item.icon),
                                 contentDescription = "Home",
-                                modifier = Modifier.size(bottomBarProperties.iconSize.dp),
+                                modifier = Modifier.size(bottomBarProperties.iconSize),
                                 tint = tintColor
                             )
 
@@ -139,7 +169,7 @@ fun AnimatedBottomBar(
     }
 }
 
-@Composable
+
 private fun getBottomNavIndex(
     currentDestinationRoute: String?,
     bottomNavItems: List<BottomNavItem>
@@ -149,29 +179,4 @@ private fun getBottomNavIndex(
         else -> bottomNavItems.indexOfFirst { it.route == currentDestinationRoute }
             .takeIf { it != -1 } ?: 0
     }
-}
-
-@Preview
-@Composable
-private fun BottomNavBarPreview() {
-    AnimatedBottomBar(
-        navController = rememberNavController(),
-        bottomNavItem = listOf(
-            BottomNavItem(
-                name = "Home",
-                route = "home",
-                icon = R.drawable.ic_home
-            ),
-            BottomNavItem(
-                name = "Search Value sldl",
-                route = "search",
-                icon = R.drawable.ic_home
-            ),
-            BottomNavItem(
-                name = "T",
-                route = "search",
-                icon = R.drawable.ic_home
-            ),
-        ),
-    )
 }

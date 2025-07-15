@@ -53,6 +53,7 @@ dependencies {
 
     implementation(project(":animated-bottom-bar"))
 
+    //implementation(libs.custombottomnavbar)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

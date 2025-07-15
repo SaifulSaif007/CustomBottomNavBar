@@ -43,6 +43,11 @@ class MainActivity : ComponentActivity() {
                                     icon = R.drawable.ic_home
                                 ),
                                 BottomNavItem(
+                                    name = "Settings",
+                                    route = "setting",
+                                    icon = R.drawable.ic_setting
+                                ),
+                                BottomNavItem(
                                     name = "Search",
                                     route = "search",
                                     icon = R.drawable.ic_search
@@ -52,14 +57,9 @@ class MainActivity : ComponentActivity() {
                                     route = "profile",
                                     icon = R.drawable.ic_profile
                                 ),
-                                BottomNavItem(
-                                    name = "Settings",
-                                    route = "setting",
-                                    icon = R.drawable.ic_setting
-                                ),
                             ),
                             bottomBarProperties = BottomBarProperties(
-                                itemArrangement = Arrangement.Start
+                                itemArrangement = Arrangement.SpaceAround
                             ),
                             onSelectItem = {
                                 Log.d("TAG", "Selected Item: ${it.route}")
