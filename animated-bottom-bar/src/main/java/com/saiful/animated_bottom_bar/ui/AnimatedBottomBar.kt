@@ -22,7 +22,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -38,12 +37,9 @@ import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
-import com.saiful.animated_bottom_bar.R
 import com.saiful.animated_bottom_bar.ui.model.BottomBarProperties
 import com.saiful.animated_bottom_bar.ui.model.BottomNavItem
 
@@ -56,35 +52,34 @@ fun AnimatedBottomBar(
 ) {
 
     val currentIndex: MutableIntState = remember { mutableIntStateOf(0) }
-    var itemWidth by remember { mutableFloatStateOf(0f) }
     val itemsWidth by remember { mutableStateOf(FloatArray(bottomNavItem.size)) }
-    val offsets = remember { mutableStateListOf<Offset>() }
+    val itemsOffsets = remember { mutableStateListOf<Offset>() }
+
+    var indicatorOffsetX by remember { mutableStateOf(0.dp) }
+    var indicatorBoxWidth by remember { mutableStateOf(0.dp) }
 
 
     // Initialize with zero offsets if needed
     LaunchedEffect(bottomNavItem.size) {
-        if (offsets.size < bottomNavItem.size) {
-            offsets.addAll(List(bottomNavItem.size - offsets.size) { Offset.Zero })
+        if (itemsOffsets.size < bottomNavItem.size) {
+            itemsOffsets.addAll(List(bottomNavItem.size - itemsOffsets.size) { Offset.Zero })
         }
     }
 
-
-    val offsetAnim by animateFloatAsState(
-        targetValue = offsets.getOrNull(currentIndex.intValue)?.x ?: 0f,
+    val indicatorOffsetAnim by animateFloatAsState(
+        targetValue = itemsOffsets.getOrNull(currentIndex.intValue)?.x ?: 0f,
         label = ""
     )
 
-    var offsetAnimInDp by remember { mutableStateOf(0.dp) }
-    var itemInDp by remember { mutableStateOf(0.dp) }
 
     val density = LocalDensity.current
 
-    LaunchedEffect(key1 = itemWidth) {
-        itemInDp = with(density) { itemsWidth[currentIndex.intValue].toDp() }
+    LaunchedEffect(key1 = itemsWidth[currentIndex.intValue]) {
+        indicatorBoxWidth = with(density) { itemsWidth[currentIndex.intValue].toDp() }
     }
 
-    LaunchedEffect(key1 = offsetAnim) {
-        offsetAnimInDp = with(density) { offsetAnim.toDp() }
+    LaunchedEffect(key1 = indicatorOffsetAnim) {
+        indicatorOffsetX = with(density) { indicatorOffsetAnim.toDp() }
     }
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -109,9 +104,9 @@ fun AnimatedBottomBar(
 
                 Box(
                     modifier = Modifier
-                        .width(itemInDp)
+                        .width(indicatorBoxWidth)
                         .height(50.dp)
-                        .offset(offsetAnimInDp)
+                        .offset(x = indicatorOffsetX)
                         .clip(bottomBarProperties.indicatorShape)
                         .background(bottomBarProperties.indicatorColor)
                 )
@@ -132,22 +127,17 @@ fun AnimatedBottomBar(
                                 ) {
                                     onSelectItem(item)
                                 }
-                                .then(
-                                    Modifier
-                                        .onSizeChanged {
-                                            itemWidth = it.width.toFloat()
-                                            itemsWidth[index] = itemWidth
+                                .then(Modifier.onSizeChanged {
+                                        itemsWidth[index] = it.width.toFloat()
+                                    }.onGloballyPositioned { layoutCoordinates ->
+                                        val position = layoutCoordinates.positionInParent()
+                                        if (index < itemsOffsets.size) {
+                                            itemsOffsets[index] = position
+                                        } else {
+                                            itemsOffsets.add(position)
                                         }
-                                        .onGloballyPositioned { layoutCoordinates ->
-                                            val position = layoutCoordinates.positionInParent()
-                                            if (index < offsets.size) {
-                                                offsets[index] = position
-                                            } else {
-                                                offsets.add(position)
-                                            }
-                                        }
-                                )
-                                .padding(bottomBarProperties.itemPadding),
+                                    })
+                                .padding(horizontal = bottomBarProperties.itemPadding),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.Center
                         ) {
@@ -158,7 +148,7 @@ fun AnimatedBottomBar(
                             Icon(
                                 painter = painterResource(id = item.icon),
                                 contentDescription = "Home",
-                                modifier = Modifier.size(bottomBarProperties.iconSize.dp),
+                                modifier = Modifier.size(bottomBarProperties.iconSize),
                                 tint = tintColor
                             )
 
@@ -179,7 +169,7 @@ fun AnimatedBottomBar(
     }
 }
 
-@Composable
+
 private fun getBottomNavIndex(
     currentDestinationRoute: String?,
     bottomNavItems: List<BottomNavItem>
@@ -189,29 +179,4 @@ private fun getBottomNavIndex(
         else -> bottomNavItems.indexOfFirst { it.route == currentDestinationRoute }
             .takeIf { it != -1 } ?: 0
     }
-}
-
-@Preview
-@Composable
-private fun BottomNavBarPreview() {
-    AnimatedBottomBar(
-        navController = rememberNavController(),
-        bottomNavItem = listOf(
-            BottomNavItem(
-                name = "Home",
-                route = "home",
-                icon = R.drawable.ic_home
-            ),
-            BottomNavItem(
-                name = "Search Value sldl",
-                route = "search",
-                icon = R.drawable.ic_home
-            ),
-            BottomNavItem(
-                name = "T",
-                route = "search",
-                icon = R.drawable.ic_home
-            ),
-        ),
-    )
 }
