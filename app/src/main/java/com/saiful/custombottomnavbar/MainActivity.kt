@@ -59,7 +59,7 @@ class MainActivity : ComponentActivity() {
                                 ),
                             ),
                             bottomBarProperties = BottomBarProperties(
-                                itemArrangement = Arrangement.SpaceAround
+                                itemArrangement = Arrangement.SpaceBetween
                             ),
                             onSelectItem = {
                                 Log.d("TAG", "Selected Item: ${it.route}")
