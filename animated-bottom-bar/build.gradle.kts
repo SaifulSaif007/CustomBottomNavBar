@@ -45,7 +45,7 @@ afterEvaluate {
 
                 groupId = "com.saiful"
                 artifactId = "animated-bottom-bar"
-                version = "1.0"
+                version = "1.0.1"
 
             }
         }
