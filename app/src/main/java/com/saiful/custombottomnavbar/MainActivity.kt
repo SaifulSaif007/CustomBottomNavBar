@@ -5,18 +5,20 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.compose.*
-
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.saiful.animated_bottom_bar.ui.AnimatedBottomBar
 import com.saiful.animated_bottom_bar.ui.model.BottomBarProperties
 import com.saiful.animated_bottom_bar.ui.model.BottomNavItem
 import com.saiful.custombottomnavbar.ui.screen.Screen
-
 import com.saiful.custombottomnavbar.ui.theme.CustomBottomNavBarTheme
 
 class MainActivity : ComponentActivity() {
@@ -32,10 +34,10 @@ class MainActivity : ComponentActivity() {
                     Log.d("TAG", "current destination: ${destination.route}")
                 }
 
-                Scaffold(modifier = Modifier.fillMaxSize(),
+                Scaffold(
+                    modifier = Modifier.fillMaxSize(),
                     bottomBar = {
                         AnimatedBottomBar(
-                            navController = navController,
                             bottomNavItem = listOf(
                                 BottomNavItem(
                                     name = "Home",
@@ -61,9 +63,8 @@ class MainActivity : ComponentActivity() {
                             bottomBarProperties = BottomBarProperties(
                                 itemArrangement = Arrangement.SpaceBetween
                             ),
-                            onSelectItem = {
-                                Log.d("TAG", "Selected Item: ${it.route}")
-                                navController.navigate(it.route) {
+                            onSelectItem = { item, _ ->
+                                navController.navigate(item.route) {
                                     popUpTo(navController.graph.startDestinationId) {
                                         saveState = true
                                     }

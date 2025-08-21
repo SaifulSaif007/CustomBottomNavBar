@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -50,10 +51,11 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.navigation)
+    implementation(libs.kotlinx.serialization.json)
 
-    //implementation(project(":animated-bottom-bar"))
+    implementation(project(":animated-bottom-bar"))
 
-    implementation(libs.custombottomnavbar)
+    //implementation(libs.custombottomnavbar)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
