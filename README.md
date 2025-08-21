@@ -37,7 +37,7 @@ dependencyResolutionManagement {
 ```
 ### 2. Add the dependency
 
-**Latest version:** `1.0.2`
+**Latest version:** `1.0.3`
 
 In your module-level build.gradle.kts:
 ```kotlin
@@ -62,8 +62,15 @@ fun MyApp() {
         bottomBar = {
             CustomBottomNavBar(
                 items = navItems,
-                selectedIndex = selected,
-                onItemSelected = { newIndex -> selected = newIndex },
+                onSelectItem = { item, index ->
+                    navController.navigate(item.route) {
+                        popUpTo(navController.graph.startDestinationId) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
                 activeColor = Color.Cyan,
                 inactiveColor = Color.Gray,
                 // Other custom styling as needed
