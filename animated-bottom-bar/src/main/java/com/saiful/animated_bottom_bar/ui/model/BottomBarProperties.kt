@@ -21,7 +21,7 @@ data class BottomBarProperties(
         ),
     val iconSize: Dp = 24.dp,
     val itemPadding: Dp = 12.dp,
-    val itemArrangement: Arrangement.Horizontal = Arrangement.SpaceAround,
+    val itemArrangement: Arrangement.Horizontal = Arrangement.SpaceBetween,
     val indicatorColor: Color = Color.Blue.copy(alpha = 0.5f),
     val indicatorShape: Shape = RoundedCornerShape(12.dp),
 )
