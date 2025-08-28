@@ -1,6 +1,7 @@
 package com.saiful.animated_bottom_bar.ui
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
@@ -39,6 +40,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import com.saiful.animated_bottom_bar.ui.model.BottomBarProperties
 import com.saiful.animated_bottom_bar.ui.model.BottomNavItem
 
@@ -46,9 +48,14 @@ import com.saiful.animated_bottom_bar.ui.model.BottomNavItem
 @Composable
 fun <T>AnimatedBottomBar(
     bottomNavItem: List<BottomNavItem<T>>,
+    navController: NavHostController,
     bottomBarProperties: BottomBarProperties = BottomBarProperties(),
     onSelectItem: (BottomNavItem<T>, index: Int) -> Unit,
 ) {
+
+    navController.addOnDestinationChangedListener { _, destination, _ ->
+        Log.d("TAG", "current destination: ${destination.route}")
+    }
 
     val itemsWidth by remember { mutableStateOf(FloatArray(bottomNavItem.size)) }
     val itemsOffsets = remember { mutableStateListOf<Offset>() }
@@ -119,7 +126,6 @@ fun <T>AnimatedBottomBar(
                                     indication = null,
                                     interactionSource = MutableInteractionSource()
                                 ) {
-                                    currentIndex.intValue = index
                                     onSelectItem(item, index)
                                 }
                                 .then(
