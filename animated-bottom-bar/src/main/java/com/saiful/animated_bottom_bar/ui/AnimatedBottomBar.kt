@@ -39,12 +39,14 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import com.saiful.animated_bottom_bar.ui.model.BottomBarProperties
 import com.saiful.animated_bottom_bar.ui.model.BottomNavItem
 
 @SuppressLint("UseOfNonLambdaOffsetOverload")
 @Composable
-fun <T>AnimatedBottomBar(
+fun <T> AnimatedBottomBar(
+    navController: NavHostController,
     bottomNavItem: List<BottomNavItem<T>>,
     bottomBarProperties: BottomBarProperties = BottomBarProperties(),
     onSelectItem: (BottomNavItem<T>, index: Int) -> Unit,
@@ -57,6 +59,15 @@ fun <T>AnimatedBottomBar(
     var indicatorBoxWidth by remember { mutableStateOf(0.dp) }
 
     val currentIndex: MutableIntState = remember { mutableIntStateOf(0) }
+
+
+    LaunchedEffect(navController) {
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            val newIndex = findRouteIndex(destination.route, bottomNavItem)
+            currentIndex.intValue = newIndex
+        }
+    }
+
 
     LaunchedEffect(bottomNavItem.size) {
         if (itemsOffsets.size < bottomNavItem.size) {
@@ -119,7 +130,6 @@ fun <T>AnimatedBottomBar(
                                     indication = null,
                                     interactionSource = MutableInteractionSource()
                                 ) {
-                                    currentIndex.intValue = index
                                     onSelectItem(item, index)
                                 }
                                 .then(
@@ -165,4 +175,20 @@ fun <T>AnimatedBottomBar(
             }
         }
     }
+}
+
+private fun findRouteIndex(route: String?, bottomNavItem: List<BottomNavItem<*>>): Int {
+    if (route == null) return 0
+
+    return bottomNavItem.indexOfFirst { item ->
+        when (val itemRoute = item.route) {
+            is String -> itemRoute == route
+            else -> {
+                // For objects/classes, try multiple matching strategies
+                val routeString = itemRoute.toString()
+
+                route == routeString || route.endsWith(routeString) || route.contains(routeString)
+            }
+        }
+    }.takeIf { it != -1 } ?: 0
 }

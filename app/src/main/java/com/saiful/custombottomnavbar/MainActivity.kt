@@ -18,6 +18,7 @@ import androidx.navigation.compose.rememberNavController
 import com.saiful.animated_bottom_bar.ui.AnimatedBottomBar
 import com.saiful.animated_bottom_bar.ui.model.BottomBarProperties
 import com.saiful.animated_bottom_bar.ui.model.BottomNavItem
+import com.saiful.custombottomnavbar.ui.Routes
 import com.saiful.custombottomnavbar.ui.screen.Screen
 import com.saiful.custombottomnavbar.ui.theme.CustomBottomNavBarTheme
 
@@ -38,25 +39,26 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     bottomBar = {
                         AnimatedBottomBar(
+                            navController = navController,
                             bottomNavItem = listOf(
                                 BottomNavItem(
                                     name = "Home",
-                                    route = "home",
+                                    route = Routes.Home,
                                     icon = R.drawable.ic_home
                                 ),
                                 BottomNavItem(
                                     name = "Settings",
-                                    route = "setting",
+                                    route = Routes.Settings,
                                     icon = R.drawable.ic_setting
                                 ),
                                 BottomNavItem(
                                     name = "Search",
-                                    route = "search",
+                                    route = Routes.Search,
                                     icon = R.drawable.ic_search
                                 ),
                                 BottomNavItem(
                                     name = "Profile",
-                                    route = "profile",
+                                    route = Routes.Profile,
                                     icon = R.drawable.ic_profile
                                 ),
                             ),
@@ -78,19 +80,19 @@ class MainActivity : ComponentActivity() {
 
                     NavHost(
                         navController = navController,
-                        startDestination = "home",
+                        startDestination = Routes.Home,
                         modifier = Modifier.padding(paddingValues)
                     ) {
-                        composable(route = "home") {
+                        composable<Routes.Home> {
                             Screen("Home")
                         }
-                        composable("search") {
+                        composable<Routes.Search> {
                             Screen("Search")
                         }
-                        composable("profile") {
+                        composable<Routes.Profile> {
                             Screen("Profile")
                         }
-                        composable("setting") {
+                        composable<Routes.Settings> {
                             Screen("Setting")
                         }
                     }
