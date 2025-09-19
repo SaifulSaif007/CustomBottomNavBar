@@ -37,7 +37,7 @@ dependencyResolutionManagement {
 ```
 ### 2. Add the dependency
 
-**Latest version:** `1.0.3`
+**Latest version:** `1.0.5`
 
 In your module-level build.gradle.kts:
 ```kotlin
