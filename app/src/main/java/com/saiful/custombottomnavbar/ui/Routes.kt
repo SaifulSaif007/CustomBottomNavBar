@@ -15,4 +15,8 @@ sealed class Routes {
 
     @Serializable
     data object Settings : Routes()
+
+    @Serializable
+    data class Details(val id: Int = 0) : Routes()
+
 }

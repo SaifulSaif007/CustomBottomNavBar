@@ -20,6 +20,8 @@ import com.saiful.animated_bottom_bar.ui.model.BottomBarProperties
 import com.saiful.animated_bottom_bar.ui.model.BottomNavItem
 import com.saiful.custombottomnavbar.ui.Routes
 import com.saiful.custombottomnavbar.ui.screen.Screen
+import com.saiful.custombottomnavbar.ui.screen.SearchDetailsScreen
+import com.saiful.custombottomnavbar.ui.screen.SearchScreen
 import com.saiful.custombottomnavbar.ui.theme.CustomBottomNavBarTheme
 
 class MainActivity : ComponentActivity() {
@@ -87,13 +89,19 @@ class MainActivity : ComponentActivity() {
                             Screen("Home")
                         }
                         composable<Routes.Search> {
-                            Screen("Search")
+                            SearchScreen(onSearch = {
+                                navController.navigate(Routes.Details(2))
+                            })
                         }
                         composable<Routes.Profile> {
                             Screen("Profile")
                         }
                         composable<Routes.Settings> {
                             Screen("Setting")
+                        }
+
+                        composable<Routes.Details> {
+                            SearchDetailsScreen()
                         }
                     }
 

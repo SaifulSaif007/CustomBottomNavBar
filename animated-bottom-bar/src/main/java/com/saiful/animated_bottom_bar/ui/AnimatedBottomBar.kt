@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.saiful.animated_bottom_bar.ui.model.BottomBarProperties
 import com.saiful.animated_bottom_bar.ui.model.BottomNavItem
+import com.saiful.animated_bottom_bar.ui.util.extractTypeSafeRouteName
 
 @SuppressLint("UseOfNonLambdaOffsetOverload")
 @Composable
@@ -64,7 +65,7 @@ fun <T> AnimatedBottomBar(
     LaunchedEffect(navController) {
         navController.addOnDestinationChangedListener { _, destination, _ ->
             val newIndex = findRouteIndex(destination.route, bottomNavItem)
-            currentIndex.intValue = newIndex
+            if (newIndex >= 0) currentIndex.intValue = newIndex
         }
     }
 
@@ -178,17 +179,15 @@ fun <T> AnimatedBottomBar(
 }
 
 private fun findRouteIndex(route: String?, bottomNavItem: List<BottomNavItem<*>>): Int {
-    if (route == null) return 0
+    if (route == null) return -1
 
     return bottomNavItem.indexOfFirst { item ->
         when (val itemRoute = item.route) {
             is String -> itemRoute == route
             else -> {
-                // For objects/classes, try multiple matching strategies
                 val routeString = itemRoute.toString()
-
-                route == routeString || route.endsWith(routeString) || route.contains(routeString)
+                routeString == route.extractTypeSafeRouteName()
             }
         }
-    }.takeIf { it != -1 } ?: 0
+    }
 }
