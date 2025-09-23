@@ -37,12 +37,13 @@ dependencyResolutionManagement {
 ```
 ### 2. Add the dependency
 
-**Latest version:** `1.0.5`
+![Latest Release](https://img.shields.io/github/v/release/SaifulSaif007/CustomBottomNavBar?style=flat-square)
+
 
 In your module-level build.gradle.kts:
 ```kotlin
 dependencies {
-     implementation("com.github.SaifulSaif007:CustomBottomNavBar:master-SNAPSHOT")
+     implementation("com.github.SaifulSaif007:CustomBottomNavBar:<latest version>")
 }
 ```
 
