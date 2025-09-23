@@ -12,6 +12,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -19,9 +20,8 @@ import com.saiful.animated_bottom_bar.ui.AnimatedBottomBar
 import com.saiful.animated_bottom_bar.ui.model.BottomBarProperties
 import com.saiful.animated_bottom_bar.ui.model.BottomNavItem
 import com.saiful.custombottomnavbar.ui.Routes
+import com.saiful.custombottomnavbar.ui.navgraph.searchNavGraph
 import com.saiful.custombottomnavbar.ui.screen.Screen
-import com.saiful.custombottomnavbar.ui.screen.SearchDetailsScreen
-import com.saiful.custombottomnavbar.ui.screen.SearchScreen
 import com.saiful.custombottomnavbar.ui.theme.CustomBottomNavBarTheme
 
 class MainActivity : ComponentActivity() {
@@ -69,7 +69,7 @@ class MainActivity : ComponentActivity() {
                             ),
                             onSelectItem = { item, _ ->
                                 navController.navigate(item.route) {
-                                    popUpTo(navController.graph.startDestinationId) {
+                                    popUpTo(navController.graph.findStartDestination().id) {
                                         saveState = true
                                     }
                                     launchSingleTop = true
@@ -88,11 +88,9 @@ class MainActivity : ComponentActivity() {
                         composable<Routes.Home> {
                             Screen("Home")
                         }
-                        composable<Routes.Search> {
-                            SearchScreen(onSearch = {
-                                navController.navigate(Routes.Details(2))
-                            })
-                        }
+
+                        searchNavGraph(navController = navController)
+
                         composable<Routes.Profile> {
                             Screen("Profile")
                         }
@@ -100,9 +98,6 @@ class MainActivity : ComponentActivity() {
                             Screen("Setting")
                         }
 
-                        composable<Routes.Details> {
-                            SearchDetailsScreen()
-                        }
                     }
 
                 }

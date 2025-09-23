@@ -39,10 +39,12 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavDestination
+import androidx.navigation.NavDestination.Companion.hasRoute
+import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
 import com.saiful.animated_bottom_bar.ui.model.BottomBarProperties
 import com.saiful.animated_bottom_bar.ui.model.BottomNavItem
-import com.saiful.animated_bottom_bar.ui.util.extractTypeSafeRouteName
 
 @SuppressLint("UseOfNonLambdaOffsetOverload")
 @Composable
@@ -64,7 +66,7 @@ fun <T> AnimatedBottomBar(
 
     LaunchedEffect(navController) {
         navController.addOnDestinationChangedListener { _, destination, _ ->
-            val newIndex = findRouteIndex(destination.route, bottomNavItem)
+            val newIndex = findRouteIndex(destination, bottomNavItem)
             if (newIndex >= 0) currentIndex.intValue = newIndex
         }
     }
@@ -178,15 +180,15 @@ fun <T> AnimatedBottomBar(
     }
 }
 
-private fun findRouteIndex(route: String?, bottomNavItem: List<BottomNavItem<*>>): Int {
-    if (route == null) return -1
+private fun findRouteIndex(destination: NavDestination, bottomNavItem: List<BottomNavItem<*>>): Int {
+    if (destination.route == null) return -1
 
     return bottomNavItem.indexOfFirst { item ->
-        when (val itemRoute = item.route) {
-            is String -> itemRoute == route
+        when (item.route) {
+            is String ->
+                destination.hierarchy.any { it.route == item.route }
             else -> {
-                val routeString = itemRoute.toString()
-                routeString == route.extractTypeSafeRouteName()
+                destination.hierarchy.any { it.hasRoute(item.route::class) }
             }
         }
     }
