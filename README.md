@@ -57,7 +57,6 @@ fun MyApp() {
         NavItem("Search", Icons.Default.Search),
         NavItem("Profile", Icons.Default.Person)
     )
-    var selected by remember { mutableStateOf(0) }
 
     Scaffold(
         bottomBar = {
