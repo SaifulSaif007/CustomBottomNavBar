@@ -54,7 +54,6 @@ fun <T> AnimatedBottomBar(
     bottomBarProperties: BottomBarProperties = BottomBarProperties(),
     onSelectItem: (BottomNavItem<T>, index: Int) -> Unit,
 ) {
-
     val itemsWidth by remember { mutableStateOf(FloatArray(bottomNavItem.size)) }
     val itemsOffsets = remember { mutableStateListOf<Offset>() }
 
@@ -63,12 +62,13 @@ fun <T> AnimatedBottomBar(
 
     val currentIndex: MutableIntState = remember { mutableIntStateOf(0) }
 
-
-    LaunchedEffect(navController) {
+    LaunchedEffect(Unit) {
+        println("destination --> ${currentIndex.intValue}")
         navController.addOnDestinationChangedListener { _, destination, _ ->
             val newIndex = findRouteIndex(destination, bottomNavItem)
             if (newIndex >= 0) currentIndex.intValue = newIndex
         }
+        println("destination --> ${currentIndex.intValue}")
     }
 
 
